@@ -316,12 +316,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               onPressed: () =>
                                   setState(() => _searchQuery = ''),
                             ),
-                          IconButton(
-                            icon: const Icon(Icons.settings_outlined),
-                            onPressed: () {
-                              Navigator.of(context).pushNamed('/settings');
-                            },
-                          ),
+                          // IconButton(
+                          //   icon: const Icon(Icons.settings_outlined),
+                          //   onPressed: () {
+                          //     Navigator.of(context).pushNamed('/settings');
+                          //   },
+                          // ),
                         ],
                       ),
                     ],
