@@ -214,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
     //   ),
     // );
 
-    Widget _searchBar() {
+    Widget searchBar() {
       final controller = SearchController();
       return SearchAnchor(
         searchController: controller,
@@ -228,17 +228,48 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         suggestionsBuilder:
             (BuildContext context, SearchController controller) {
-              return List<ListTile>.generate(5, (int index) {
-                final String item = 'item $index';
+              final query = controller.text.trim();
+              final ledger = Provider.of<LedgerProvider>(
+                context,
+                listen: false,
+              );
+              final entities = ledger.getUniqueEntities();
+
+              // If query empty, show top 5 entities as suggestions
+              final matches = query.isEmpty
+                  ? entities.take(5).toList()
+                  : entities
+                        .where(
+                          (e) => e.toLowerCase().contains(query.toLowerCase()),
+                        )
+                        .toList();
+
+              if (matches.isEmpty) {
+                if (query.isEmpty) {
+                  return <ListTile>[ListTile(title: Text('No entities'))];
+                }
+
+                // Allow searching for arbitrary query
+                return <ListTile>[
+                  ListTile(
+                    title: Text('Search for "$query"'),
+                    onTap: () {
+                      controller.closeView(query);
+                      setState(() => _searchQuery = query);
+                    },
+                  ),
+                ];
+              }
+
+              return matches.map((item) {
                 return ListTile(
                   title: Text(item),
                   onTap: () {
-                    setState(() {
-                      controller.closeView(item);
-                    });
+                    controller.closeView(item);
+                    setState(() => _searchQuery = item);
                   },
                 );
-              });
+              }).toList();
             },
       );
     }
@@ -277,7 +308,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       Row(
                         children: [
-                          _searchBar(),
+                          searchBar(),
+                          if (_searchQuery.trim().isNotEmpty)
+                            IconButton(
+                              tooltip: 'Clear search',
+                              icon: const Icon(Icons.refresh_outlined),
+                              onPressed: () =>
+                                  setState(() => _searchQuery = ''),
+                            ),
                           IconButton(
                             icon: const Icon(Icons.settings_outlined),
                             onPressed: () {
@@ -295,26 +333,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 32),
-                  TextField(
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.search),
-                      hintText: 'Search contacts or entities',
-                      filled: true,
-                      fillColor: Theme.of(context).canvasColor,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.primary.withAlpha(80),
-                          width: 0.5,
-                        ),
-                      ),
-                    ),
-                    onChanged: (value) => setState(() => _searchQuery = value),
-                  ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 16),
+                  // Search is handled by the SearchAnchor (tap the search icon),
+                  // which updates `_searchQuery` when a suggestion is selected.
+                  const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
