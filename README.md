@@ -53,6 +53,13 @@ Notes:
 - Use Flutter stable channel for consistent results.
 - The app includes widget and integration points; please run tests after changes.
 
+Build APK:
+
+```shell
+flutter build appbundle --no-tree-shake-icons
+flutter build apk --split-per-abi --no-tree-shake-icons
+```
+
 ---
 
 ## Contributing 🙌
