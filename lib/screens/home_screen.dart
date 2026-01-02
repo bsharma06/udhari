@@ -25,205 +25,20 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _init() async {
     final provider = Provider.of<LedgerProvider>(context, listen: false);
     await provider.init();
-    setState(() => _loading = false);
+    if (mounted) setState(() => _loading = false);
   }
 
   @override
   Widget build(BuildContext context) {
-    // return Scaffold(
-    //   appBar: AppBar(
-    //     title: const Text('Udhari'),
-    //     actions: [
-    //       IconButton(
-    //         tooltip: 'Settings',
-    //         icon: const Icon(Icons.settings),
-    //         onPressed: () => Navigator.of(context).pushNamed('/settings'),
-    //       ),
-    //     ],
-    //   ),
-    //   body: Consumer<LedgerProvider>(
-    //     builder: (context, ledger, child) {
-    //       if (_loading) return const Center(child: CircularProgressIndicator());
-    //       final totalReceive = ledger.totalReceivable();
-    //       final totalPay = ledger.totalPayable();
-    //       final entities = ledger.getUniqueEntities();
-    //       final filtered = _searchQuery.trim().isEmpty
-    //           ? entities
-    //           : entities
-    //                 .where(
-    //                   (e) =>
-    //                       e.toLowerCase().contains(_searchQuery.toLowerCase()),
-    //                 )
-    //                 .toList();
-    //       return Column(
-    //         children: [
-    //           Padding(
-    //             padding: const EdgeInsets.symmetric(
-    //               horizontal: 12.0,
-    //               vertical: 8,
-    //             ),
-    //             child: TextField(
-    //               decoration: InputDecoration(
-    //                 prefixIcon: const Icon(Icons.search),
-    //                 hintText: 'Search contacts or entities',
-    //                 filled: true,
-    //                 fillColor: Theme.of(context).canvasColor,
-    //                 border: OutlineInputBorder(
-    //                   borderRadius: BorderRadius.circular(12),
-    //                   borderSide: BorderSide.none,
-    //                 ),
-    //               ),
-    //               onChanged: (v) => setState(() => _searchQuery = v),
-    //             ),
-    //           ),
-    //           Padding(
-    //             padding: const EdgeInsets.all(12.0),
-    //             child: Row(
-    //               children: [
-    //                 Expanded(
-    //                   child: Container(
-    //                     padding: const EdgeInsets.all(12),
-    //                     decoration: BoxDecoration(
-    //                       gradient: LinearGradient(
-    //                         colors: [
-    //                           Colors.green.shade50,
-    //                           Colors.green.shade100,
-    //                         ],
-    //                       ),
-    //                       borderRadius: BorderRadius.circular(12),
-    //                     ),
-    //                     child: Column(
-    //                       crossAxisAlignment: CrossAxisAlignment.start,
-    //                       children: [
-    //                         const Text(
-    //                           'Total Receivable',
-    //                           style: TextStyle(fontSize: 12),
-    //                         ),
-    //                         const SizedBox(height: 8),
-    //                         TweenAnimationBuilder<double>(
-    //                           tween: Tween(begin: 0.0, end: totalReceive),
-    //                           duration: const Duration(milliseconds: 700),
-    //                           builder: (context, val, child) => Text(
-    //                             '\u20B9${val.toStringAsFixed(2)}',
-    //                             style: const TextStyle(
-    //                               color: Colors.green,
-    //                               fontSize: 20,
-    //                               fontWeight: FontWeight.bold,
-    //                             ),
-    //                           ),
-    //                         ),
-    //                       ],
-    //                     ),
-    //                   ),
-    //                 ),
-    //                 const SizedBox(width: 8),
-    //                 Expanded(
-    //                   child: Container(
-    //                     padding: const EdgeInsets.all(12),
-    //                     decoration: BoxDecoration(
-    //                       gradient: LinearGradient(
-    //                         colors: [Colors.red.shade50, Colors.red.shade100],
-    //                       ),
-    //                       borderRadius: BorderRadius.circular(12),
-    //                     ),
-    //                     child: Column(
-    //                       crossAxisAlignment: CrossAxisAlignment.start,
-    //                       children: [
-    //                         const Text(
-    //                           'Total Payable',
-    //                           style: TextStyle(fontSize: 12),
-    //                         ),
-    //                         const SizedBox(height: 8),
-    //                         TweenAnimationBuilder<double>(
-    //                           tween: Tween(begin: 0.0, end: totalPay),
-    //                           duration: const Duration(milliseconds: 700),
-    //                           builder: (context, val, child) => Text(
-    //                             '\u20B9${val.toStringAsFixed(2)}',
-    //                             style: const TextStyle(
-    //                               color: Colors.red,
-    //                               fontSize: 20,
-    //                               fontWeight: FontWeight.bold,
-    //                             ),
-    //                           ),
-    //                         ),
-    //                       ],
-    //                     ),
-    //                   ),
-    //                 ),
-    //               ],
-    //             ),
-    //           ),
-    //           const Divider(),
-    //           Expanded(
-    //             child: AnimatedSwitcher(
-    //               duration: const Duration(milliseconds: 400),
-    //               child: filtered.isEmpty
-    //                   ? Center(
-    //                       child: Column(
-    //                         mainAxisSize: MainAxisSize.min,
-    //                         children: [
-    //                           Icon(
-    //                             Icons.inbox,
-    //                             size: 72,
-    //                             color: Colors.grey.shade400,
-    //                           ),
-    //                           const SizedBox(height: 12),
-    //                           Text(
-    //                             'No matches',
-    //                             style: Theme.of(context).textTheme.titleLarge,
-    //                           ),
-    //                           const SizedBox(height: 6),
-    //                           Text(
-    //                             'Try searching for a different name',
-    //                             style: Theme.of(context).textTheme.bodyLarge
-    //                                 ?.copyWith(color: Colors.grey),
-    //                           ),
-    //                         ],
-    //                       ),
-    //                     )
-    //                   : ListView.builder(
-    //                       key: ValueKey(filtered.length),
-    //                       padding: const EdgeInsets.symmetric(vertical: 8),
-    //                       itemCount: filtered.length,
-    //                       itemBuilder: (context, index) {
-    //                         final e = filtered[index];
-    //                         final net = ledger.netForEntity(e);
-    //                         return BalanceTile(
-    //                           name: e,
-    //                           net: net,
-    //                           onTap: () => Navigator.of(context).push(
-    //                             MaterialPageRoute(
-    //                               builder: (_) => DetailScreen(entity: e),
-    //                             ),
-    //                           ),
-    //                         );
-    //                       },
-    //                     ),
-    //             ),
-    //           ),
-    //         ],
-    //       );
-    //     },
-    //   ),
-    //   floatingActionButton: FloatingActionButton(
-    //     heroTag: 'add-transaction',
-    //     onPressed: () => Navigator.of(context).push(
-    //       MaterialPageRoute(builder: (_) => const TransactionFormScreen()),
-    //     ),
-    //     child: const Icon(Icons.add),
-    //   ),
-    // );
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     Widget searchBar() {
-      final controller = SearchController();
       return SearchAnchor(
-        searchController: controller,
         builder: (BuildContext context, SearchController controller) {
           return IconButton(
             icon: const Icon(Icons.search),
-            onPressed: () {
-              controller.openView();
-            },
+            onPressed: () => controller.openView(),
           );
         },
         suggestionsBuilder:
@@ -235,7 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
               );
               final entities = ledger.getUniqueEntities();
 
-              // If query empty, show top 5 entities as suggestions
               final matches = query.isEmpty
                   ? entities.take(5).toList()
                   : entities
@@ -245,14 +59,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         .toList();
 
               if (matches.isEmpty) {
-                if (query.isEmpty) {
-                  return <ListTile>[ListTile(title: Text('No entities'))];
-                }
-
-                // Allow searching for arbitrary query
-                return <ListTile>[
+                return [
                   ListTile(
-                    title: Text('Search for "$query"'),
+                    title: Text(
+                      query.isEmpty ? 'No entities' : 'Search for "$query"',
+                    ),
                     onTap: () {
                       controller.closeView(query);
                       setState(() => _searchQuery = query);
@@ -261,15 +72,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 ];
               }
 
-              return matches.map((item) {
-                return ListTile(
-                  title: Text(item),
-                  onTap: () {
-                    controller.closeView(item);
-                    setState(() => _searchQuery = item);
-                  },
-                );
-              }).toList();
+              return matches
+                  .map(
+                    (item) => ListTile(
+                      title: Text(item),
+                      onTap: () {
+                        controller.closeView(item);
+                        setState(() => _searchQuery = item);
+                      },
+                    ),
+                  )
+                  .toList();
             },
       );
     }
@@ -278,6 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Consumer<LedgerProvider>(
         builder: (context, ledger, child) {
           if (_loading) return const Center(child: CircularProgressIndicator());
+
           final totalReceive = ledger.totalReceivable();
           final totalPay = ledger.totalPayable();
           final entities = ledger.getUniqueEntities();
@@ -290,171 +104,127 @@ class _HomeScreenState extends State<HomeScreen> {
                     )
                     .toList();
 
-          return SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 40),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Hi there,",
-                        style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          searchBar(),
-                          if (_searchQuery.trim().isNotEmpty)
-                            IconButton(
-                              tooltip: 'Clear search',
-                              icon: const Icon(Icons.refresh_outlined),
-                              onPressed: () =>
-                                  setState(() => _searchQuery = ''),
-                            ),
-                          // IconButton(
-                          //   icon: const Icon(Icons.settings_outlined),
-                          //   onPressed: () {
-                          //     Navigator.of(context).pushNamed('/settings');
-                          //   },
-                          // ),
-                        ],
-                      ),
-                    ],
+          return CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                floating: true,
+                backgroundColor: colorScheme.surface,
+                title: Text(
+                  "Hi there,",
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.secondary,
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "Here is your transaction summary",
-                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                      fontWeight: FontWeight.w600,
+                ),
+                actions: [
+                  searchBar(),
+                  if (_searchQuery.isNotEmpty)
+                    IconButton(
+                      icon: const Icon(Icons.refresh_outlined),
+                      onPressed: () => setState(() => _searchQuery = ''),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Search is handled by the SearchAnchor (tap the search icon),
-                  // which updates `_searchQuery` when a suggestion is selected.
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "To be received".toUpperCase(),
-                        style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.secondary.withAlpha(150),
-                        ),
-                      ),
-                      Text(
-                        "To be paid".toUpperCase(),
-                        style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.secondary.withAlpha(150),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Divider(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0.0, end: totalReceive),
-                            duration: const Duration(milliseconds: 700),
-                            builder: (context, val, child) => Text(
-                              '\u20B9${val.toStringAsFixed(2)}',
-                              style: Theme.of(context).textTheme.titleLarge!
-                                  .copyWith(
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0.0, end: totalPay),
-                            duration: const Duration(milliseconds: 700),
-                            builder: (context, val, child) => Text(
-                              '\u20B9${val.toStringAsFixed(2)}',
-                              style: Theme.of(context).textTheme.titleLarge!
-                                  .copyWith(
-                                    color: Colors.red,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 32),
-                  Text("Recent Transactions"),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 400),
-                      child: filtered.isEmpty
-                          ? Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.inbox,
-                                    size: 72,
-                                    color: Colors.grey.shade400,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'No matches',
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.titleLarge,
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    'Try searching for a different name',
-                                    style: Theme.of(context).textTheme.bodyLarge
-                                        ?.copyWith(color: Colors.grey),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : ListView.builder(
-                              key: ValueKey(filtered.length),
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              itemCount: filtered.length,
-                              itemBuilder: (context, index) {
-                                final e = filtered[index];
-                                final net = ledger.netForEntity(e);
-                                return BalanceTile(
-                                  name: e,
-                                  net: net,
-                                  onTap: () => Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => DetailScreen(entity: e),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                    ),
-                  ),
+                  const SizedBox(width: 4),
                 ],
               ),
-            ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Your balance overview",
+                        style: textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Modern Tonal Card for Summary
+                      Card(
+                        elevation: 0,
+                        color: colorScheme.surfaceContainerHighest.withValues(
+                          alpha: 0.4,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24.0,
+                            vertical: 32,
+                          ),
+                          child: Row(
+                            children: [
+                              _buildSummaryItem(
+                                context,
+                                "Receivable",
+                                totalReceive,
+                                colorScheme.primary,
+                              ),
+                              Container(
+                                height: 40,
+                                width: 1,
+                                color: colorScheme.outlineVariant,
+                              ),
+                              _buildSummaryItem(
+                                context,
+                                "Payable",
+                                totalPay,
+                                colorScheme.error,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 32),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Recent Transactions",
+                            style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          if (_searchQuery.isNotEmpty)
+                            Text(
+                              "Results for '$_searchQuery'",
+                              style: textTheme.bodySmall,
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Animated List Section
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: filtered.isEmpty
+                    ? SliverFillRemaining(child: _buildEmptyState(context))
+                    : SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final e = filtered[index];
+                          return BalanceTile(
+                            name: e,
+                            net: ledger.netForEntity(e),
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => DetailScreen(entity: e),
+                              ),
+                            ),
+                          );
+                        }, childCount: filtered.length),
+                      ),
+              ),
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 80),
+              ), // Space for FAB
+            ],
           );
         },
       ),
@@ -463,7 +233,8 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: () => Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const TransactionFormScreen()),
         ),
-        shape: CircleBorder(),
+        elevation: 3,
+        // shape: CircleBorder(),
         child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -484,6 +255,57 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSummaryItem(
+    BuildContext context,
+    String label,
+    double value,
+    Color color,
+  ) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(letterSpacing: 1.2),
+          ),
+          const SizedBox(height: 4),
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: value),
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeOutExpo,
+            builder: (context, val, child) => Text(
+              '₹${val.toStringAsFixed(2)}',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.search_off_rounded,
+          size: 64,
+          color: Theme.of(context).colorScheme.outline,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'No transactions found',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+      ],
     );
   }
 }
