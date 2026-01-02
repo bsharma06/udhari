@@ -135,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       SizedBox(height: 16),
                       Text(
                         "Your balance overview",
-                        style: textTheme.titleLarge?.copyWith(
+                        style: textTheme.displayMedium?.copyWith(
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.5,
                         ),

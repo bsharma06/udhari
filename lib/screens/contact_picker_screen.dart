@@ -22,26 +22,26 @@ class _ContactPickerScreenState extends State<ContactPickerScreen> {
   Future<void> _loadContacts() async {
     final granted = await FlutterContacts.requestPermission();
     if (!granted) {
-      setState(() {
-        _contacts = [];
-        _filtered = [];
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _contacts = [];
+          _filtered = [];
+          _loading = false;
+        });
+      }
       return;
     }
     final c = await FlutterContacts.getContacts(withProperties: true);
-    setState(() {
-      _contacts = c;
-      _filtered = c;
-      _loading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _contacts = c;
+        _filtered = c;
+        _loading = false;
+      });
+    }
   }
 
   void _onSearch(String q) {
-    if (q.isEmpty) {
-      setState(() => _filtered = _contacts);
-      return;
-    }
     final lower = q.toLowerCase();
     setState(() {
       _filtered = _contacts
@@ -52,42 +52,124 @@ class _ContactPickerScreenState extends State<ContactPickerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Select contact')),
+      appBar: AppBar(title: const Text('Select Contact'), centerTitle: true),
       body: Column(
         children: [
+          // 1. Modern M3 Search Bar
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: TextField(
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search),
-                hintText: 'Search contacts',
-              ),
               onChanged: _onSearch,
+              decoration: InputDecoration(
+                hintText: 'Search contacts...',
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.4,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(28),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+              ),
             ),
           ),
+
+          // 2. Contact List
           if (_loading)
             const Expanded(child: Center(child: CircularProgressIndicator()))
+          else if (_filtered.isEmpty)
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.person_search_outlined,
+                      size: 64,
+                      color: colorScheme.outlineVariant,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No contacts found',
+                      style: textTheme.bodyLarge?.copyWith(
+                        color: colorScheme.outline,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
           else
             Expanded(
-              child: _filtered.isEmpty
-                  ? const Center(child: Text('No contacts'))
-                  : ListView.builder(
-                      itemCount: _filtered.length,
-                      itemBuilder: (context, index) {
-                        final c = _filtered[index];
-                        return ListTile(
-                          title: Text(c.displayName),
-                          subtitle: c.phones.isNotEmpty
-                              ? Text(c.phones.first.number)
-                              : null,
-                          onTap: () => Navigator.of(context).pop(c),
-                        );
-                      },
+              child: ListView.builder(
+                itemCount: _filtered.length,
+                padding: const EdgeInsets.only(bottom: 24),
+                itemBuilder: (context, index) {
+                  final c = _filtered[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
                     ),
+                    child: ListTile(
+                      onTap: () => Navigator.of(context).pop(c),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      leading: CircleAvatar(
+                        radius: 24,
+                        backgroundColor: colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.5),
+                        child: Text(
+                          _getInitials(c.displayName),
+                          style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        c.displayName,
+                        style: textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      subtitle: c.phones.isNotEmpty
+                          ? Text(
+                              c.phones.first.number,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant.withValues(
+                                  alpha: 0.7,
+                                ),
+                              ),
+                            )
+                          : null,
+                      trailing: Icon(
+                        Icons.chevron_right,
+                        size: 16,
+                        color: colorScheme.outlineVariant,
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
         ],
       ),
     );
+  }
+
+  String _getInitials(String name) {
+    if (name.isEmpty) return "?";
+    final parts = name.trim().split(' ');
+    if (parts.length == 1) return parts[0][0].toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 }
