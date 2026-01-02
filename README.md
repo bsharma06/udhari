@@ -5,14 +5,14 @@ A concise finance ledger app built with Flutter. Udhari helps users track money 
 ---
 
 <div style="text-align: center;">
-  <img src="./snapshot/Home-1.png" alt="Home Screen" style="width: 30%; margin: 0 auto;"/>
-  <img src="./snapshot/Home-2.png" alt="Home Screen" style="width: 30%; margin: 0 auto;"/>
-  <img src="./snapshot/Detail.png" alt="Detail" style="width: 30%; margin: 0 auto;"/>
+  <img src="./snapshot/Home-1.png" alt="Home Screen" style="width: 32%; margin: 0 auto;"/>
+  <img src="./snapshot/Home-2.png" alt="Home Screen" style="width: 32%; margin: 0 auto;"/>
+  <img src="./snapshot/Detail.png" alt="Detail" style="width: 32%; margin: 0 auto;"/>
 </div>
 <div style="text-align: center;">
-  <img src="./snapshot/NewEntry.png" alt="New Entry" style="width: 30%; margin: 0 auto;"/>
-  <img src="./snapshot/EditEntry.png" alt="Edit Entry" style="width: 30%; margin: 0 auto;"/>
-  <img src="./snapshot/Settings.png" alt="Settings" style="width: 30%; margin: 0 auto;"/>
+  <img src="./snapshot/NewEntry.png" alt="New Entry" style="width: 32%; margin: 0 auto;"/>
+  <img src="./snapshot/EditEntry.png" alt="Edit Entry" style="width: 32%; margin: 0 auto;"/>
+  <img src="./snapshot/Settings.png" alt="Settings" style="width: 32%; margin: 0 auto;"/>
 </div>
 
 ---
