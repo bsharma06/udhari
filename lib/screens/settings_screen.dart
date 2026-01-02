@@ -178,8 +178,9 @@ class SettingsScreen extends StatelessWidget {
         _showSnackbar(context, 'Exported to $outputFile', isError: false);
       }
     } catch (e) {
-      if (context.mounted)
+      if (context.mounted) {
         _showSnackbar(context, 'Export failed: $e', isError: true);
+      }
     }
   }
 
