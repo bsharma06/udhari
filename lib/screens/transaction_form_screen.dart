@@ -22,12 +22,10 @@ class TransactionFormScreen extends StatefulWidget {
 class _TransactionFormScreenState extends State<TransactionFormScreen> {
   final _formKey = GlobalKey<FormState>();
   TransactionType _type = TransactionType.toReceive;
-  late List<bool> _selectedType;
   final _amountCtrl = TextEditingController();
   final _entityCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
   DateTime _date = DateTime.now();
-  double _opacity = 0.0;
 
   @override
   void initState() {
@@ -42,12 +40,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     } else if (widget.initialEntityName != null) {
       _entityCtrl.text = widget.initialEntityName!;
     }
-    _selectedType = [
-      _type == TransactionType.toReceive,
-      _type == TransactionType.toPay,
-    ];
-    // fade in the form for a smoother UX
-    Future.microtask(() => setState(() => _opacity = 1.0));
   }
 
   @override
@@ -78,6 +70,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     }
   }
 
+  // ... Save and Delete logic stays the same ...
   void _save() async {
     if (!_formKey.currentState!.validate()) return;
     final amount = double.tryParse(_amountCtrl.text) ?? 0.0;
@@ -90,186 +83,194 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
       description: _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim(),
     );
     final ledger = Provider.of<LedgerProvider>(context, listen: false);
-    final navigator = Navigator.of(context);
     if (widget.existing == null) {
       await ledger.addTransaction(tx);
     } else {
       await ledger.updateTransaction(tx);
     }
-    if (mounted) {
-      navigator.pop();
-    }
+    if (mounted) Navigator.pop(context);
   }
 
   void _delete() async {
-    if (widget.existing?.id == null) return;
     final ledger = Provider.of<LedgerProvider>(context, listen: false);
-    final navigator = Navigator.of(context);
     await ledger.deleteTransaction(widget.existing!.id!);
-    if (mounted) {
-      navigator.pop();
-    }
+    if (mounted) Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.existing == null ? 'New Transaction' : 'Edit Transaction',
-        ),
+        title: Text(widget.existing == null ? 'New Entry' : 'Edit Entry'),
+        centerTitle: true,
         actions: [
           if (widget.existing != null)
-            IconButton(onPressed: _delete, icon: const Icon(Icons.delete)),
+            IconButton(
+              onPressed: _delete,
+              icon: Icon(Icons.delete_outline, color: colorScheme.error),
+            ),
         ],
       ),
-      body: AnimatedOpacity(
-        opacity: _opacity,
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeInOut,
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Form(
-            key: _formKey,
-            child: ListView(
-              children: [
-                Center(
-                  child: ToggleButtons(
-                    constraints: const BoxConstraints(
-                      minWidth: 120, // Fixed width for each button
-                      maxWidth: 120, // Fixed width for each button
-                      minHeight: 40, // Fixed height for each button
-                      maxHeight: 40, // Fixed height for each button
-                    ),
-                    isSelected: _selectedType,
-                    onPressed: (i) => setState(() {
-                      _selectedType = [i == 0, i == 1];
-                      _type = i == 0
-                          ? TransactionType.toReceive
-                          : TransactionType.toPay;
-                    }),
-                    borderRadius: BorderRadius.circular(8),
-                    selectedColor: Colors.white,
-                    fillColor: _type == TransactionType.toReceive
-                        ? Colors.green
-                        : Colors.red,
-                    children: const [
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: Text('I Received'),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: Text('I Paid'),
-                      ),
-                    ],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 1. Transaction Type Switcher
+              SegmentedButton<TransactionType>(
+                segments: const [
+                  ButtonSegment(
+                    value: TransactionType.toReceive,
+                    label: Text('I Received'),
+                    icon: Icon(Icons.arrow_downward),
+                  ),
+                  ButtonSegment(
+                    value: TransactionType.toPay,
+                    label: Text('I Paid'),
+                    icon: Icon(Icons.arrow_upward),
+                  ),
+                ],
+                selected: {_type},
+                onSelectionChanged: (Set<TransactionType> newSelection) {
+                  setState(() => _type = newSelection.first);
+                },
+                style: SegmentedButton.styleFrom(
+                  selectedBackgroundColor: _type == TransactionType.toReceive
+                      ? colorScheme.primary
+                      : colorScheme.error,
+                  selectedForegroundColor: colorScheme.onPrimary,
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // 2. Amount Input (Main Focus)
+              TextFormField(
+                controller: _amountCtrl,
+                style: textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                textAlign: TextAlign.center,
+                decoration: InputDecoration(
+                  hintText: '0.00',
+                  prefixText: '₹ ',
+                  prefixStyle: textTheme.displaySmall?.copyWith(
+                    color: colorScheme.outline,
+                  ),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: colorScheme.outlineVariant),
                   ),
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _amountCtrl,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'Enter amount' : null,
+              ),
+              const SizedBox(height: 32),
+
+              // 3. Entity Name with Integrated Contact Picker
+              TextFormField(
+                controller: _entityCtrl,
+                decoration: InputDecoration(
+                  labelText: 'Who is this with?',
+                  prefixIcon: const Icon(Icons.person_outline),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.contact_page_outlined),
+                    onPressed: _handleContactPicker,
                   ),
-                  decoration: const InputDecoration(labelText: 'Amount'),
-                  validator: (v) =>
-                      (v == null || v.isEmpty) ? 'Enter amount' : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  filled: true,
+                  fillColor: colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.3,
+                  ),
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _entityCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Entity / Person Name',
-                        ),
-                        validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Enter name'
-                            : null,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      tooltip: 'Pick from contacts',
-                      onPressed: () async {
-                        final scaffoldMessenger = ScaffoldMessenger.of(context);
-                        final navigator = Navigator.of(context);
-                        try {
-                          final granted =
-                              await FlutterContacts.requestPermission();
-                          if (!granted) {
-                            scaffoldMessenger.showSnackBar(
-                              const SnackBar(
-                                content: Text('Contacts permission denied'),
-                              ),
-                            );
-                            return;
-                          }
-                          if (!mounted) return;
-                          final Contact? contact = await navigator.push<Contact>(
-                            MaterialPageRoute(
-                              builder: (_) => const ContactPickerScreen(),
-                            ),
-                          );
-                          if (contact != null) {
-                            setState(() {
-                              _entityCtrl.text = contact.displayName;
-                            });
-                          }
-                        } catch (e) {
-                          scaffoldMessenger.showSnackBar(
-                            SnackBar(
-                              content: Text('Failed to pick contact: $e'),
-                            ),
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.contacts),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Date & Time'),
-                  subtitle: Text(DateFormat.yMMMd().add_jm().format(_date)),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.calendar_today),
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Name required' : null,
+              ),
+              const SizedBox(height: 16),
+
+              // 4. Date and Time Selector (Using Chips)
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today_outlined, size: 20),
+                  const SizedBox(width: 12),
+                  ActionChip(
+                    label: Text(DateFormat.yMMMd().add_jm().format(_date)),
                     onPressed: _pickDate,
+                    avatar: const Icon(Icons.edit, size: 14),
+                    shape: StadiumBorder(
+                      side: BorderSide(color: colorScheme.outlineVariant),
+                    ),
+                    backgroundColor: colorScheme.surface,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // 5. Description
+              TextFormField(
+                controller: _descCtrl,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  labelText: 'Note (Optional)',
+                  alignLabelWithHint: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _descCtrl,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: 'Description (optional)',
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Hero(
-                  tag: 'add-transaction',
-                  child: ElevatedButton.icon(
-                    onPressed: _save,
-                    icon: const Icon(Icons.check),
-                    label: const Text('Save'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              const SizedBox(height: 40),
+
+              // 6. Save Button (Hero Animated)
+              Hero(
+                tag: 'add-transaction',
+                child: FilledButton(
+                  onPressed: _save,
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
+                  child: const Text(
+                    'Save Transaction',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _handleContactPicker() async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    try {
+      final granted = await FlutterContacts.requestPermission();
+      if (!granted) {
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(content: Text('Permission denied')),
+        );
+        return;
+      }
+      if (!mounted) return;
+      final Contact? contact = await Navigator.of(context).push<Contact>(
+        MaterialPageRoute(builder: (_) => const ContactPickerScreen()),
+      );
+      if (contact != null) {
+        setState(() => _entityCtrl.text = contact.displayName);
+      }
+    } catch (e) {
+      scaffoldMessenger.showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
   }
 }

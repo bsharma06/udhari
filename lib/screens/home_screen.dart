@@ -115,6 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: colorScheme.secondary,
                   ),
                 ),
+
                 actions: [
                   searchBar(),
                   if (_searchQuery.isNotEmpty)
@@ -131,6 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      SizedBox(height: 16),
                       Text(
                         "Your balance overview",
                         style: textTheme.titleLarge?.copyWith(
@@ -152,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 24.0,
-                            vertical: 32,
+                            vertical: 40,
                           ),
                           child: Row(
                             children: [
