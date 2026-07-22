@@ -1,30 +1,77 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:udhari/main.dart';
+import 'package:provider/provider.dart';
+import 'package:udhari/providers/currency_provider.dart';
+import 'package:udhari/providers/ledger_provider.dart';
+import 'package:udhari/screens/transaction_form_screen.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const AppEntry());
+  Widget buildForm() {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => LedgerProvider()),
+        ChangeNotifierProvider(
+          create: (_) => CurrencyProvider(kSupportedCurrencies.first),
+        ),
+      ],
+      child: const MaterialApp(home: TransactionFormScreen()),
+    );
+  }
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  testWidgets('a transaction amount must be greater than zero', (tester) async {
+    await tester.pumpWidget(buildForm());
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    await tester.enterText(find.byType(TextFormField).at(0), '0');
+    await tester.enterText(find.byType(TextFormField).at(1), 'Asha');
+    await tester.ensureVisible(find.text('Save Transaction'));
+    await tester.tap(find.text('Save Transaction'));
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Enter an amount greater than zero'), findsOneWidget);
+  });
+
+  testWidgets('the new entry form explains the selected balance direction', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildForm());
+
+    expect(
+      find.text('Record money you expect to collect from this person.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('I owe them'));
+    await tester.pump();
+    expect(
+      find.text('Record money you need to pay this person.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a note template fills in the description field', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildForm());
+
+    await tester.ensureVisible(find.text('Lunch'));
+    await tester.tap(find.text('Lunch'));
+    await tester.pump();
+
+    final descriptionField = tester.widget<TextFormField>(
+      find.byKey(const Key('descriptionField')),
+    );
+    expect(descriptionField.controller?.text, 'Lunch');
+  });
+
+  testWidgets('the due date control is hidden while recording a settlement', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildForm());
+
+    expect(find.text('Add due date'), findsOneWidget);
+
+    await tester.tap(find.text('Record a settlement'));
+    await tester.pump();
+
+    expect(find.text('Add due date'), findsNothing);
   });
 }

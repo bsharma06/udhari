@@ -20,24 +20,19 @@ class _ContactPickerScreenState extends State<ContactPickerScreen> {
   }
 
   Future<void> _loadContacts() async {
-    final granted = await FlutterContacts.requestPermission();
-    if (!granted) {
+    try {
+      final c = await FlutterContacts.getContacts(withProperties: true);
       if (mounted) {
         setState(() {
-          _contacts = [];
-          _filtered = [];
+          _contacts = c;
+          _filtered = c;
           _loading = false;
         });
       }
-      return;
-    }
-    final c = await FlutterContacts.getContacts(withProperties: true);
-    if (mounted) {
-      setState(() {
-        _contacts = c;
-        _filtered = c;
-        _loading = false;
-      });
+    } catch (_) {
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
 
