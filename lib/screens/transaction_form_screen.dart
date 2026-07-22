@@ -10,6 +10,14 @@ import 'package:udhari/providers/ledger_provider.dart';
 
 const _kNoteTemplates = ['Lunch', 'Rent', 'Groceries', 'Loan', 'Gift', 'Travel'];
 
+// This theme's generated primaryContainer/onPrimaryContainer pair happens to
+// stay a light pastel tone in both light and dark mode, but the standard M3
+// errorContainer role does not — it turns a dark, saturated red in dark
+// mode. These fixed values keep the "I owe them" amount card the same light,
+// soft look as the "They owe me" card in both themes.
+const _kAmountErrorContainer = Color(0xffffdad6);
+const _kOnAmountErrorContainer = Color(0xff93000a);
+
 class TransactionFormScreen extends StatefulWidget {
   final LedgerTransaction? existing;
   final String? initialEntityName;
@@ -201,10 +209,10 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
         : colorScheme.error;
     final accentContainer = isReceiveDirection
         ? colorScheme.primaryContainer
-        : colorScheme.errorContainer;
+        : _kAmountErrorContainer;
     final onAccentContainer = isReceiveDirection
         ? colorScheme.onPrimaryContainer
-        : colorScheme.onErrorContainer;
+        : _kOnAmountErrorContainer;
 
     return Scaffold(
       appBar: AppBar(
