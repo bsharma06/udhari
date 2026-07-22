@@ -31,7 +31,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
   final _amountCtrl = TextEditingController();
   final _entityCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
-  final _referenceCtrl = TextEditingController();
   DateTime _date = DateTime.now();
   DateTime? _dueDate;
   bool _isSaving = false;
@@ -55,7 +54,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
       _amountCtrl.text = e.amount.toStringAsFixed(2);
       _entityCtrl.text = e.entityName;
       _descCtrl.text = e.description ?? '';
-      _referenceCtrl.text = e.reference ?? '';
       _date = e.date;
       _dueDate = e.dueDate;
     } else if (widget.initialEntityName != null) {
@@ -71,7 +69,6 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     _amountCtrl.dispose();
     _entityCtrl.dispose();
     _descCtrl.dispose();
-    _referenceCtrl.dispose();
     super.dispose();
   }
 
@@ -117,9 +114,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
       date: _date,
       description: _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim(),
       dueDate: _isSettlement ? null : _dueDate,
-      reference: _referenceCtrl.text.trim().isEmpty
-          ? null
-          : _referenceCtrl.text.trim(),
+      reference: widget.existing?.reference,
     );
     final ledger = Provider.of<LedgerProvider>(context, listen: false);
     setState(() => _isSaving = true);
@@ -475,22 +470,9 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                     )
                     .toList(),
               ),
-              const SizedBox(height: 16),
-
-              // 6. Optional reference / UPI id
-              TextFormField(
-                controller: _referenceCtrl,
-                decoration: InputDecoration(
-                  labelText: 'Reference / UPI ID (Optional)',
-                  prefixIcon: const Icon(Icons.tag_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-              ),
               const SizedBox(height: 40),
 
-              // 7. Save Button (Hero Animated)
+              // 6. Save Button (Hero Animated)
               Hero(
                 tag: 'add-transaction',
                 child: FilledButton(
