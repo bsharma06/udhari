@@ -39,6 +39,7 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar> {
               setState(() => _isExpanded = !_isExpanded);
               if (_isExpanded) {
                 Future.delayed(const Duration(milliseconds: 250), () {
+                  if (!context.mounted) return;
                   FocusScope.of(context).requestFocus(_focusNode);
                 });
               } else {

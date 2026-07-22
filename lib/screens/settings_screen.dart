@@ -322,16 +322,23 @@ class SettingsScreen extends StatelessWidget {
       context: context,
       builder: (dialogContext) => SimpleDialog(
         title: const Text('Choose currency'),
-        children: kSupportedCurrencies
-            .map(
-              (c) => RadioListTile<SupportedCurrency>(
-                value: c,
-                groupValue: currency.currency,
-                title: Text(c.label),
-                onChanged: (value) => Navigator.pop(dialogContext, value),
-              ),
-            )
-            .toList(),
+        children: [
+          RadioGroup<SupportedCurrency>(
+            groupValue: currency.currency,
+            onChanged: (value) => Navigator.pop(dialogContext, value),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: kSupportedCurrencies
+                  .map(
+                    (c) => RadioListTile<SupportedCurrency>(
+                      value: c,
+                      title: Text(c.label),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+        ],
       ),
     );
     if (selected != null) {
