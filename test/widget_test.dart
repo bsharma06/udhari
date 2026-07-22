@@ -67,11 +67,11 @@ void main() {
   ) async {
     await tester.pumpWidget(buildForm());
 
-    expect(find.text('Add due date'), findsOneWidget);
+    expect(find.text('Due date'), findsOneWidget);
 
     await tester.tap(find.text('Record a settlement'));
     await tester.pump();
 
-    expect(find.text('Add due date'), findsNothing);
+    expect(find.text('Due date'), findsNothing);
   });
 }

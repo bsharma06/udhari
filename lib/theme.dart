@@ -345,6 +345,44 @@ class MaterialTheme {
         ),
         scaffoldBackgroundColor: colorScheme.surface,
         canvasColor: colorScheme.surface,
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: colorScheme.surfaceContainerHighest.withValues(
+            alpha: 0.4,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: colorScheme.primary, width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: colorScheme.error, width: 1.5),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: colorScheme.error, width: 2),
+          ),
+          labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+          hintStyle: TextStyle(
+            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+          ),
+        ),
       );
 
   List<ExtendedColor> get extendedColors => [];
