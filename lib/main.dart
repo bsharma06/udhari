@@ -12,6 +12,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // flutter build appbundle --no-tree-shake-icons
 // flutter build apk --split-per-abi --no-tree-shake-icons
+// APK install commands:
+// >>C:\Users\homep\AppData\Local\Android\Sdk\platform-tools>adb devices
+// >>C:\Users\homep\AppData\Local\Android\Sdk\platform-tools>adb install "C:\app-arm64-v8a-release.apk"
+// To install on a specific device, use the following command with the device serial number and path to the APK:
+// >>adb -s <device_serial> install <path_to_apk>
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
