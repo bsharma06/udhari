@@ -22,7 +22,12 @@ class DBHelper {
   Future<Database> _initDB() async {
     final documentsDirectory = await getApplicationDocumentsDirectory();
     final path = join(documentsDirectory.path, 'udhari.db');
-    return await openDatabase(path, version: 1, onCreate: _onCreate);
+    return await openDatabase(
+      path,
+      version: 2,
+      onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
+    );
   }
 
   FutureOr<void> _onCreate(Database db, int version) async {
@@ -33,9 +38,18 @@ class DBHelper {
         amount REAL NOT NULL,
         type INTEGER NOT NULL,
         date TEXT NOT NULL,
-        description TEXT
+        description TEXT,
+        dueDate TEXT,
+        reference TEXT
       )
     ''');
+  }
+
+  FutureOr<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE transactions ADD COLUMN dueDate TEXT');
+      await db.execute('ALTER TABLE transactions ADD COLUMN reference TEXT');
+    }
   }
 
   Future<int> insertTransaction(LedgerTransaction t) async {
@@ -56,6 +70,30 @@ class DBHelper {
   Future<int> deleteTransaction(int id) async {
     final db = await database;
     return await db.delete('transactions', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int> deleteTransactionsForEntity(String entity) async {
+    final db = await database;
+    return await db.delete(
+      'transactions',
+      where: 'entityName = ?',
+      whereArgs: [entity],
+    );
+  }
+
+  Future<int> renameEntity(String oldName, String newName) async {
+    final db = await database;
+    return await db.update(
+      'transactions',
+      {'entityName': newName},
+      where: 'entityName = ?',
+      whereArgs: [oldName],
+    );
+  }
+
+  Future<void> deleteAllTransactions() async {
+    final db = await database;
+    await db.delete('transactions');
   }
 
   Future<List<LedgerTransaction>> getAllTransactions() async {
