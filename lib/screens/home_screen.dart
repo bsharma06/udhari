@@ -364,6 +364,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 sliver: filtered.isEmpty
                     ? SliverFillRemaining(
+                        hasScrollBody: false,
                         child: _buildEmptyState(context, hasAnyEntities),
                       )
                     : SliverList(
